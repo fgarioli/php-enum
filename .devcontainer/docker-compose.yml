@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    environment:
+      VARIANT: 7.4
+    volumes:
+      - ..:/workspace
+    user: vscode
+    command: sleep infinity
