@@ -6,10 +6,12 @@ use JsonSerializable;
 
 abstract class Enum implements JsonSerializable
 {
-    private string $value;
+    private string $label;
+    private $value;
 
-    private function __construct(string $value)
+    private function __construct(string $label, $value)
     {
+        $this->label = $label;
         $this->value = $value;
     }
 
@@ -17,8 +19,10 @@ abstract class Enum implements JsonSerializable
     {
         $class = get_called_class();
         $reflection = new \ReflectionClass($class);
-        foreach ($reflection->getConstants() as $value) {
-            return new $class($value);
+        foreach ($reflection->getConstants() as $key => $value) {
+            if ($key === $name) {
+                return new $class($key, $value);
+            }
         }
 
         throw new \Exception("Invalid method {$name} called in class {$class}");
@@ -26,38 +30,35 @@ abstract class Enum implements JsonSerializable
 
     public function jsonSerialize(): mixed
     {
-        return $this->value;
+        return $this->getValue();
     }
 
-    public static function from(string $value): self
+    public static function from($value): self
     {
         $class = get_called_class();
         $reflection = new \ReflectionClass($class);
-        $constants = $reflection->getConstants();
 
-        if (!in_array($value, $constants)) {
-            throw new \InvalidArgumentException("Invalid value for TipoObjeto");
+        foreach ($reflection->getConstants() as $key => $cValue) {
+            if ($cValue === $value) {
+                return new $class($key, $cValue);
+            }
         }
 
-        return new $class($value);
+        throw new \InvalidArgumentException("Invalid value for {$class}");
     }
 
-    /**
-     *
-     * @param string $value
-     * @return self|null
-     */
-    public static function tryFrom(string $value): ?self
+    public static function tryFrom($value): ?self
     {
         $class = get_called_class();
         $reflection = new \ReflectionClass($class);
-        $constants = $reflection->getConstants();
 
-        if (!in_array($value, $constants)) {
-            return null;
+        foreach ($reflection->getConstants() as $key => $cValue) {
+            if ($cValue === $value) {
+                return new $class($key, $cValue);
+            }
         }
 
-        return new $class($value);
+        return null;
     }
 
     /**
@@ -90,5 +91,10 @@ abstract class Enum implements JsonSerializable
     public function equals(self $other): bool
     {
         return $this->value === $other->getValue();
+    }
+
+    public function getLabel(): string
+    {
+        return $this->label;
     }
 }
