@@ -3,6 +3,7 @@
 namespace FGarioli\Enum;
 
 use JsonSerializable;
+use ReturnTypeWillChange;
 
 abstract class Enum implements JsonSerializable
 {
@@ -28,7 +29,8 @@ abstract class Enum implements JsonSerializable
         throw new \Exception("Invalid method {$name} called in class {$class}");
     }
 
-    public function jsonSerialize(): mixed
+    #[ReturnTypeWillChange]
+    public function jsonSerialize()
     {
         return $this->getValue();
     }
